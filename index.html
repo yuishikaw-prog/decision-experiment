@@ -162,6 +162,27 @@
             font-weight: bold;
         }
 
+        .apartment-btn-a {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8C8C 100%);
+        }
+        
+        .apartment-btn-b {
+            background: linear-gradient(135deg, #4ECDC4 0%, #6EDDD5 100%);
+        }
+        
+        .apartment-btn-c {
+            background: linear-gradient(135deg, #FFD93D 0%, #FFE066 100%);
+        }
+        
+        .apartment-btn-d {
+            background: linear-gradient(135deg, #95A5A6 0%, #B4C3C4 100%);
+        }
+        
+        .apartment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
         textarea {
             width: 100%;
             min-height: 120px;
@@ -264,31 +285,64 @@
 </head>
 <body>
     <div class="container">
-        <!-- Welcome Screen -->
-        <div id="welcomeScreen" class="screen active">
+        <!-- Student ID Screen -->
+        <div id="studentIdScreen" class="screen active">
             <h1>アパート選択実験へようこそ</h1>
-            <p class="subtitle">Dijksterhuis (2004) の追試実験</p>
+            <p class="subtitle">英語1D実験20251003</p>
+            
+            <div class="instruction">
+                <strong>学籍番号の入力</strong><br>
+                学籍番号の下3桁を入力してください。<br>
+                例：学籍番号が 2025001 の場合 → 001 と入力
+            </div>
+
+            <div style="margin: 30px 0;">
+                <input type="text" 
+                       id="studentIdInput" 
+                       placeholder="下3桁を入力（例：001）" 
+                       maxlength="3"
+                       style="width: 100%; 
+                              padding: 15px; 
+                              font-size: 20px; 
+                              border: 2px solid #e9ecef; 
+                              border-radius: 10px; 
+                              text-align: center;
+                              font-family: monospace;">
+                <button class="btn" onclick="submitStudentId()" style="margin-top: 20px;">
+                    次へ進む
+                </button>
+            </div>
+        </div>
+
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen" class="screen">
+            <h1>実験条件の選択</h1>
+            <p class="subtitle">参加者ID: <span id="displayStudentId" style="font-weight: bold; color: #667eea;"></span></p>
             
             <div class="instruction">
                 <strong>実験の流れ：</strong><br>
                 1. 4つのアパート（A、B、C、D）の特徴を見ていただきます<br>
                 2. 各アパートには12個の特徴があります（合計48要素）<br>
-                3. すべての特徴を見た後、最適なアパートを選んでいただきます<br>
+                3. すべての特徴を見た後、条件に応じて判断していただきます<br>
                 4. 最後にGoogle Formで回答を送信していただきます
             </div>
 
             <div class="btn-group">
                 <button class="btn" onclick="selectCondition('immediate')">
-                    条件1: Immediate（即時判断）<br>
-                    <small>すべての情報を見た直後に判断</small>
+                    条件1<br>
+                    <small>詳細は実験開始後に説明</small>
                 </button>
                 <button class="btn" onclick="selectCondition('conscious')">
-                    条件2: Conscious（熟考）<br>
-                    <small>3分間じっくり考えてから判断</small>
+                    条件2<br>
+                    <small>詳細は実験開始後に説明</small>
                 </button>
                 <button class="btn" onclick="selectCondition('unconscious')">
-                    条件3: Unconscious（気晴らし課題）<br>
-                    <small>3分間の課題を挟んでから判断</small>
+                    条件3<br>
+                    <small>詳細は実験開始後に説明</small>
+                </button>
+                <button class="btn" onclick="selectCondition('exercise')">
+                    条件4<br>
+                    <small>詳細は実験開始後に説明</small>
                 </button>
             </div>
         </div>
@@ -334,19 +388,22 @@
             
             <div class="instruction">
                 画面に表示される数字を覚えてください。<br>
-                現在の数字が<strong>2つ前</strong>の数字と同じなら「同じ」を、違うなら「違う」を押してください。
+                現在の数字が<strong>2つ前</strong>の数字と同じ場合のみ、「一致」ボタンを押してください。<br>
+                <span style="color: #dc3545;">※各数字につき1回のみボタンを押せます</span>
             </div>
 
             <div class="timer" id="unconsciousTimer">3:00</div>
 
             <div class="nback-game">
                 <div class="nback-number" id="nbackNumber">-</div>
-                <div class="nback-buttons">
-                    <button class="btn" onclick="nbackResponse(true)">同じ</button>
-                    <button class="btn" onclick="nbackResponse(false)">違う</button>
+                <div style="margin-top: 30px;">
+                    <button class="btn" id="nbackButton" onclick="nbackResponse()" disabled>
+                        一致
+                    </button>
                 </div>
                 <p style="margin-top: 20px; color: #666;">
-                    正解数: <span id="nbackScore">0</span>
+                    正解数: <span id="nbackScore">0</span> / 
+                    回答数: <span id="nbackResponses">0</span>
                 </p>
             </div>
         </div>
@@ -354,30 +411,39 @@
         <!-- Selection Screen -->
         <div id="selectionScreen" class="screen">
             <h1>アパートの選択</h1>
-            <p class="subtitle">最適だと思うアパートを選んでください</p>
+            <p class="subtitle">仲の良い友人におすすめするアパートを選んでください</p>
             
-            <div class="instruction">
-                4つのアパートの中から、最も住みたいと思うアパートを1つ選んでください。
+            <div class="instruction" id="normalInstruction">
+                この中で最もおすすめできるアパートはどれですか？
+            </div>
+
+            <div class="instruction" id="exerciseInstruction" style="display: none; background: #d4edda; border-color: #28a745; color: #155724;">
+                <strong>🏃 運動条件：まず軽い運動を行ってください</strong><br><br>
+                以下の運動を行ってから、アパートを選択してください：<br>
+                1. その場で軽くジャンプを10回<br>
+                2. 腕を大きく回す（前後各5回）<br>
+                3. 深呼吸を3回<br><br>
+                ✅ 運動が終わったら、最もおすすめできるアパートはどれですか？
             </div>
 
             <div class="apartment-choice">
-                <button class="btn apartment-btn" onclick="selectApartment('A')">アパート A</button>
-                <button class="btn apartment-btn" onclick="selectApartment('B')">アパート B</button>
-                <button class="btn apartment-btn" onclick="selectApartment('C')">アパート C</button>
-                <button class="btn apartment-btn" onclick="selectApartment('D')">アパート D</button>
+                <button class="btn apartment-btn apartment-btn-a" onclick="selectApartment('A')">アパート A</button>
+                <button class="btn apartment-btn apartment-btn-b" onclick="selectApartment('B')">アパート B</button>
+                <button class="btn apartment-btn apartment-btn-c" onclick="selectApartment('C')">アパート C</button>
+                <button class="btn apartment-btn apartment-btn-d" onclick="selectApartment('D')">アパート D</button>
             </div>
         </div>
 
         <!-- Reason Screen -->
         <div id="reasonScreen" class="screen">
-            <h1>判断理由の記入</h1>
-            <p class="subtitle">なぜそのアパートを選びましたか？</p>
+            <h1>推薦理由の記入</h1>
+            <p class="subtitle">なぜそのアパートを友人におすすめしましたか？</p>
             
             <p style="margin: 20px 0; color: #666;">
                 選択したアパート: <strong style="color: #667eea; font-size: 24px;" id="selectedApartmentDisplay">-</strong>
             </p>
 
-            <textarea id="reasonText" placeholder="選んだ理由を自由に記述してください。&#10;例：駅が近くて便利だから、家賃が安いから、など"></textarea>
+            <textarea id="reasonText" placeholder="友人におすすめした理由を自由に記述してください。&#10;例：駅が近くて便利だから、家賃が安いから、など"></textarea>
 
             <button class="btn" onclick="submitReason()">次へ</button>
         </div>
@@ -430,6 +496,16 @@
             apartment: 'entry.685617715',
             reason: 'entry.11330204'
         };
+
+        // Test logging for debugging
+        function logFormData() {
+            console.log('Form Data:', {
+                participantId: participantId,
+                condition: getConditionName(currentCondition),
+                apartment: `アパート ${selectedApartment}`,
+                reason: reasonText
+            });
+        }
 
         // Apartment data with 12 features each
         const apartments = {
@@ -498,13 +574,36 @@
         let startTime = 0;
         let selectedApartment = '';
         let participantId = '';
+        let studentId = '';
         let reasonText = '';
         let nbackSequence = [];
         let nbackIndex = 0;
         let nbackScore = 0;
+        let nbackTotalResponses = 0;
+        let nbackCurrentResponded = false;
         let consciousInterval = null;
         let unconsciousInterval = null;
         let nbackInterval = null;
+
+        // Submit student ID
+        function submitStudentId() {
+            const input = document.getElementById('studentIdInput').value;
+            
+            // Validate input (should be 3 digits)
+            if (!/^\d{3}$/.test(input)) {
+                alert('3桁の数字を入力してください（例：001）');
+                return;
+            }
+            
+            studentId = input;
+            participantId = 'S' + studentId + '_' + Date.now().toString(36);
+            
+            // Display student ID on the next screen
+            document.getElementById('displayStudentId').textContent = studentId;
+            
+            // Move to condition selection
+            showScreen('welcomeScreen');
+        }
 
         // Generate random participant ID
         function generateParticipantId() {
@@ -546,7 +645,6 @@
         // Select condition
         function selectCondition(condition) {
             currentCondition = condition;
-            participantId = generateParticipantId();
             presentationOrder = createPresentationOrder();
             currentPresentationIndex = 0;
             startTime = Date.now();
@@ -578,6 +676,12 @@
         // Handle presentation complete
         function handlePresentationComplete() {
             if (currentCondition === 'immediate') {
+                document.getElementById('normalInstruction').style.display = 'block';
+                document.getElementById('exerciseInstruction').style.display = 'none';
+                showScreen('selectionScreen');
+            } else if (currentCondition === 'exercise') {
+                document.getElementById('normalInstruction').style.display = 'none';
+                document.getElementById('exerciseInstruction').style.display = 'block';
                 showScreen('selectionScreen');
             } else if (currentCondition === 'conscious') {
                 showScreen('consciousScreen');
@@ -609,13 +713,22 @@
             nbackSequence = [];
             nbackIndex = 0;
             nbackScore = 0;
+            nbackTotalResponses = 0;
             
+            // Generate sequence with some intentional matches for 2-back
             for (let i = 0; i < 60; i++) {
-                nbackSequence.push(Math.floor(Math.random() * 9) + 1);
+                if (i >= 2 && Math.random() < 0.3) {
+                    // 30% chance to create a 2-back match
+                    nbackSequence.push(nbackSequence[i - 2]);
+                } else {
+                    nbackSequence.push(Math.floor(Math.random() * 9) + 1);
+                }
             }
 
             let timeLeft = 180;
             updateTimerDisplay('unconsciousTimer', timeLeft);
+            document.getElementById('nbackScore').textContent = '0';
+            document.getElementById('nbackResponses').textContent = '0';
 
             unconsciousInterval = setInterval(() => {
                 timeLeft--;
@@ -638,23 +751,48 @@
             }
 
             document.getElementById('nbackNumber').textContent = nbackSequence[nbackIndex];
+            nbackCurrentResponded = false;
+            
+            // Enable button only after the first 2 numbers
+            if (nbackIndex >= 2) {
+                document.getElementById('nbackButton').disabled = false;
+            } else {
+                document.getElementById('nbackButton').disabled = true;
+            }
+            
             nbackIndex++;
 
-            nbackInterval = setTimeout(showNextNback, 3000);
+            nbackInterval = setTimeout(() => {
+                // Disable button before showing next number
+                document.getElementById('nbackButton').disabled = true;
+                showNextNback();
+            }, 3000);
         }
 
-        // N-back response
-        function nbackResponse(isSame) {
+        // N-back response (single button for matches only)
+        function nbackResponse() {
+            // Prevent multiple responses for the same number
+            if (nbackCurrentResponded) return;
+            
             if (nbackIndex < 3) return;
 
+            nbackCurrentResponded = true;
+            nbackTotalResponses++;
+            
             const current = nbackSequence[nbackIndex - 1];
             const twoBack = nbackSequence[nbackIndex - 3];
-            const correct = (isSame && current === twoBack) || (!isSame && current !== twoBack);
-
-            if (correct) {
+            
+            // Check if it's actually a match (correct response)
+            if (current === twoBack) {
                 nbackScore++;
-                document.getElementById('nbackScore').textContent = nbackScore;
             }
+            
+            // Update display
+            document.getElementById('nbackScore').textContent = nbackScore;
+            document.getElementById('nbackResponses').textContent = nbackTotalResponses;
+            
+            // Disable button after response
+            document.getElementById('nbackButton').disabled = true;
         }
 
         // Update timer display
@@ -690,24 +828,27 @@
         // Get condition name
         function getConditionName(condition) {
             const names = {
-                'immediate': 'Immediate（即時判断）',
-                'conscious': 'Conscious（熟考）',
-                'unconscious': 'Unconscious（気晴らし課題）'
+                'immediate': '条件1（即時判断）',
+                'conscious': '条件2（熟考）',
+                'unconscious': '条件3（気晴らし課題）',
+                'exercise': '条件4（運動）'
             };
             return names[condition] || condition;
         }
 
         // Open Google Form with pre-filled data
         function openGoogleForm() {
-            const params = new URLSearchParams({
-                'usp': 'pp_url',
-                [FORM_ENTRIES.participantId]: participantId,
-                [FORM_ENTRIES.condition]: getConditionName(currentCondition),
-                [FORM_ENTRIES.apartment]: `アパート ${selectedApartment}`,
-                [FORM_ENTRIES.reason]: reasonText
-            });
-
-            const formUrl = `${GOOGLE_FORM_BASE_URL}?${params.toString()}`;
+            // Log data for debugging
+            logFormData();
+            
+            // Create the pre-filled URL
+            const formUrl = `${GOOGLE_FORM_BASE_URL}?usp=pp_url` +
+                `&${FORM_ENTRIES.participantId}=${encodeURIComponent(participantId)}` +
+                `&${FORM_ENTRIES.condition}=${encodeURIComponent(getConditionName(currentCondition))}` +
+                `&${FORM_ENTRIES.apartment}=${encodeURIComponent('アパート' + selectedApartment)}` +
+                `&${FORM_ENTRIES.reason}=${encodeURIComponent(reasonText)}`;
+            
+            console.log('Opening form URL:', formUrl);
             window.open(formUrl, '_blank');
         }
     </script>
