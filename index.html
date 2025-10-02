@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アパート選択実験</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-group {
+            display: grid;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .feature-display {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .apartment-name {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .feature-text {
+            font-size: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .dimension {
+            font-weight: bold;
+            color: #764ba2;
+            margin-bottom: 5px;
+        }
+
+        .progress {
+            background: #e9ecef;
+            height: 8px;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 40px 0;
+        }
+
+        .instruction {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            color: #856404;
+        }
+
+        .apartment-choice {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .apartment-btn {
+            padding: 30px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            margin-top: 15px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .nback-game {
+            text-align: center;
+        }
+
+        .nback-number {
+            font-size: 72px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 40px 0;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nback-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .result-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: bold;
+            color: #666;
+        }
+
+        .result-value {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .apartment-choice {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-text {
+                font-size: 18px;
+            }
+
+            .apartment-name {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen" class="screen active">
+            <h1>アパート選択実験へようこそ</h1>
+            <p class="subtitle">Dijksterhuis (2004) の追試実験</p>
+            
+            <div class="instruction">
+                <strong>実験の流れ：</strong><br>
+                1. 4つのアパート（A、B、C、D）の特徴を見ていただきます<br>
+                2. 各アパートには12個の特徴があります（合計48要素）<br>
+                3. すべての特徴を見た後、最適なアパートを選んでいただきます<br>
+                4. 最後にGoogle Formで回答を送信していただきます
+            </div>
+
+            <div class="btn-group">
+                <button class="btn" onclick="selectCondition('immediate')">
+                    条件1: Immediate（即時判断）<br>
+                    <small>すべての情報を見た直後に判断</small>
+                </button>
+                <button class="btn" onclick="selectCondition('conscious')">
+                    条件2: Conscious（熟考）<br>
+                    <small>3分間じっくり考えてから判断</small>
+                </button>
+                <button class="btn" onclick="selectCondition('unconscious')">
+                    条件3: Unconscious（気晴らし課題）<br>
+                    <small>3分間の課題を挟んでから判断</small>
+                </button>
+            </div>
+        </div>
+
+        <!-- Presentation Screen -->
+        <div id="presentationScreen" class="screen">
+            <h1>アパート情報の提示</h1>
+            <div class="progress">
+                <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                <span id="currentIndex">0</span> / 48
+            </p>
+            
+            <div class="feature-display">
+                <div class="apartment-name" id="apartmentName">アパート A</div>
+                <div class="dimension" id="dimensionName">駅距離</div>
+                <div class="feature-text" id="featureText">徒歩5分</div>
+            </div>
+        </div>
+
+        <!-- Conscious Thinking Screen -->
+        <div id="consciousScreen" class="screen">
+            <h1>熟考時間</h1>
+            <p class="subtitle">アパートの特徴について考えてください</p>
+            
+            <div class="instruction">
+                これから3分間、どのアパートが最適か考える時間です。<br>
+                時間が経過したら自動的に次の画面に進みます。
+            </div>
+
+            <div class="timer" id="consciousTimer">3:00</div>
+            
+            <p style="text-align: center; color: #666;">
+                じっくりと各アパートの特徴を思い出し、比較検討してください。
+            </p>
+        </div>
+
+        <!-- Unconscious (N-back) Screen -->
+        <div id="unconsciousScreen" class="screen">
+            <h1>数字記憶課題</h1>
+            <p class="subtitle">気晴らし課題（3分間）</p>
+            
+            <div class="instruction">
+                画面に表示される数字を覚えてください。<br>
+                現在の数字が<strong>2つ前</strong>の数字と同じなら「同じ」を、違うなら「違う」を押してください。
+            </div>
+
+            <div class="timer" id="unconsciousTimer">3:00</div>
+
+            <div class="nback-game">
+                <div class="nback-number" id="nbackNumber">-</div>
+                <div class="nback-buttons">
+                    <button class="btn" onclick="nbackResponse(true)">同じ</button>
+                    <button class="btn" onclick="nbackResponse(false)">違う</button>
+                </div>
+                <p style="margin-top: 20px; color: #666;">
+                    正解数: <span id="nbackScore">0</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Selection Screen -->
+        <div id="selectionScreen" class="screen">
+            <h1>アパートの選択</h1>
+            <p class="subtitle">最適だと思うアパートを選んでください</p>
+            
+            <div class="instruction">
+                4つのアパートの中から、最も住みたいと思うアパートを1つ選んでください。
+            </div>
+
+            <div class="apartment-choice">
+                <button class="btn apartment-btn" onclick="selectApartment('A')">アパート A</button>
+                <button class="btn apartment-btn" onclick="selectApartment('B')">アパート B</button>
+                <button class="btn apartment-btn" onclick="selectApartment('C')">アパート C</button>
+                <button class="btn apartment-btn" onclick="selectApartment('D')">アパート D</button>
+            </div>
+        </div>
+
+        <!-- Reason Screen -->
+        <div id="reasonScreen" class="screen">
+            <h1>判断理由の記入</h1>
+            <p class="subtitle">なぜそのアパートを選びましたか？</p>
+            
+            <p style="margin: 20px 0; color: #666;">
+                選択したアパート: <strong style="color: #667eea; font-size: 24px;" id="selectedApartmentDisplay">-</strong>
+            </p>
+
+            <textarea id="reasonText" placeholder="選んだ理由を自由に記述してください。&#10;例：駅が近くて便利だから、家賃が安いから、など"></textarea>
+
+            <button class="btn" onclick="submitReason()">次へ</button>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="resultScreen" class="screen">
+            <h1>実験完了</h1>
+            <p class="subtitle">最後にGoogle Formで回答を送信してください</p>
+            
+            <div class="result-box">
+                <div class="result-item">
+                    <span class="result-label">参加者ID:</span>
+                    <span class="result-value" id="resultParticipantId">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">実験条件:</span>
+                    <span class="result-value" id="resultCondition">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">選択したアパート:</span>
+                    <span class="result-value" id="resultApartment">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">所要時間:</span>
+                    <span class="result-value" id="resultTime">-</span>
+                </div>
+            </div>
+
+            <div class="instruction" style="margin-top: 30px; background: #d1ecf1; border-color: #0c5460; color: #0c5460;">
+                <strong>重要：</strong>下のボタンを押してGoogle Formで回答を送信してください。<br>
+                参加者IDや条件は自動入力されます。
+            </div>
+
+            <button class="btn btn-primary" onclick="openGoogleForm()">
+                📝 Google Formで回答を送信
+            </button>
+            
+            <button class="btn btn-secondary" onclick="location.reload()">
+                最初に戻る
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Google Form configuration
+        const GOOGLE_FORM_BASE_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSc0Id68V07tDtmwGdmjP6YXFlMh66uCpI3-a-vp6EXvTsPVgw/viewform';
+        const FORM_ENTRIES = {
+            participantId: 'entry.549115285',
+            condition: 'entry.520631592',
+            apartment: 'entry.685617715',
+            reason: 'entry.11330204'
+        };
+
+        // Apartment data with 12 features each
+        const apartments = {
+            'A': [
+                { dimension: '駅距離', feature: '徒歩5分', valence: '+' },
+                { dimension: '騒音', feature: 'とても静か', valence: '+' },
+                { dimension: '日当たり', feature: 'とても良い', valence: '+' },
+                { dimension: '専有面積', feature: '55㎡（広い）', valence: '+' },
+                { dimension: '家賃', feature: '相場よりやや安い', valence: '+' },
+                { dimension: '築年数', feature: '20年（管理良好）', valence: '-' },
+                { dimension: '防犯', feature: 'オートロック＋カメラ', valence: '+' },
+                { dimension: '買い物', feature: 'スーパー徒歩2分', valence: '+' },
+                { dimension: '治安', feature: 'とても安全', valence: '+' },
+                { dimension: '収納', feature: '収納が少ない', valence: '-' },
+                { dimension: 'エレベーター', feature: 'なし（低層階）', valence: '-' },
+                { dimension: 'ネット', feature: '速度が不安定', valence: '-' }
+            ],
+            'B': [
+                { dimension: '駅距離', feature: '徒歩10分', valence: '+' },
+                { dimension: '騒音', feature: '交通音やや気になる', valence: '-' },
+                { dimension: '日当たり', feature: '良い', valence: '+' },
+                { dimension: '専有面積', feature: '40㎡（やや狭い）', valence: '-' },
+                { dimension: '家賃', feature: '安い', valence: '+' },
+                { dimension: '築年数', feature: '30年', valence: '-' },
+                { dimension: '防犯', feature: 'オートロックのみ', valence: '+' },
+                { dimension: '買い物', feature: 'スーパー徒歩10分', valence: '-' },
+                { dimension: '治安', feature: '平均的', valence: '-' },
+                { dimension: '収納', feature: '十分', valence: '+' },
+                { dimension: 'エレベーター', feature: 'あり', valence: '+' },
+                { dimension: 'ネット', feature: '時々遅い', valence: '-' }
+            ],
+            'C': [
+                { dimension: '駅距離', feature: '徒歩18分', valence: '-' },
+                { dimension: '騒音', feature: '夜間は静か', valence: '+' },
+                { dimension: '日当たり', feature: 'やや悪い', valence: '-' },
+                { dimension: '専有面積', feature: '45㎡（やや狭い）', valence: '-' },
+                { dimension: '家賃', feature: '相場並み', valence: '+' },
+                { dimension: '築年数', feature: '8年（築浅）', valence: '+' },
+                { dimension: '防犯', feature: 'カメラのみ', valence: '-' },
+                { dimension: '買い物', feature: 'スーパー徒歩3分', valence: '+' },
+                { dimension: '治安', feature: '安全', valence: '+' },
+                { dimension: '収納', feature: '少ない', valence: '-' },
+                { dimension: 'エレベーター', feature: 'なし', valence: '-' },
+                { dimension: 'ネット', feature: '高速光回線', valence: '+' }
+            ],
+            'D': [
+                { dimension: '駅距離', feature: '徒歩25分', valence: '-' },
+                { dimension: '騒音', feature: 'とても騒がしい', valence: '-' },
+                { dimension: '日当たり', feature: '悪い', valence: '-' },
+                { dimension: '専有面積', feature: '35㎡（狭い）', valence: '-' },
+                { dimension: '家賃', feature: '高い', valence: '-' },
+                { dimension: '築年数', feature: '40年（老朽）', valence: '-' },
+                { dimension: '防犯', feature: '共用鍵のみ', valence: '-' },
+                { dimension: '買い物', feature: 'コンビニ徒歩1分', valence: '+' },
+                { dimension: '治安', feature: '事件報告あり', valence: '-' },
+                { dimension: '収納', feature: 'とても多い', valence: '+' },
+                { dimension: 'エレベーター', feature: 'あり', valence: '+' },
+                { dimension: 'ネット', feature: '高速光回線', valence: '+' }
+            ]
+        };
+
+        // State variables
+        let currentCondition = '';
+        let presentationOrder = [];
+        let currentPresentationIndex = 0;
+        let startTime = 0;
+        let selectedApartment = '';
+        let participantId = '';
+        let reasonText = '';
+        let nbackSequence = [];
+        let nbackIndex = 0;
+        let nbackScore = 0;
+        let consciousInterval = null;
+        let unconsciousInterval = null;
+        let nbackInterval = null;
+
+        // Generate random participant ID
+        function generateParticipantId() {
+            return 'P' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+
+        // Shuffle array
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Create presentation order
+        function createPresentationOrder() {
+            const allFeatures = [];
+            for (const apt in apartments) {
+                apartments[apt].forEach(feature => {
+                    allFeatures.push({
+                        apartment: apt,
+                        ...feature
+                    });
+                });
+            }
+            return shuffleArray(allFeatures);
+        }
+
+        // Show screen
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Select condition
+        function selectCondition(condition) {
+            currentCondition = condition;
+            participantId = generateParticipantId();
+            presentationOrder = createPresentationOrder();
+            currentPresentationIndex = 0;
+            startTime = Date.now();
+            
+            showScreen('presentationScreen');
+            presentNextFeature();
+        }
+
+        // Present next feature
+        function presentNextFeature() {
+            if (currentPresentationIndex >= presentationOrder.length) {
+                handlePresentationComplete();
+                return;
+            }
+
+            const feature = presentationOrder[currentPresentationIndex];
+            document.getElementById('apartmentName').textContent = `アパート ${feature.apartment}`;
+            document.getElementById('dimensionName').textContent = feature.dimension;
+            document.getElementById('featureText').textContent = feature.feature;
+            
+            const progress = ((currentPresentationIndex + 1) / presentationOrder.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('currentIndex').textContent = currentPresentationIndex + 1;
+
+            currentPresentationIndex++;
+            setTimeout(presentNextFeature, 3000);
+        }
+
+        // Handle presentation complete
+        function handlePresentationComplete() {
+            if (currentCondition === 'immediate') {
+                showScreen('selectionScreen');
+            } else if (currentCondition === 'conscious') {
+                showScreen('consciousScreen');
+                startConsciousTimer();
+            } else if (currentCondition === 'unconscious') {
+                showScreen('unconsciousScreen');
+                startUnconscious();
+            }
+        }
+
+        // Start conscious timer
+        function startConsciousTimer() {
+            let timeLeft = 180;
+            updateTimerDisplay('consciousTimer', timeLeft);
+
+            consciousInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay('consciousTimer', timeLeft);
+                
+                if (timeLeft <= 0) {
+                    clearInterval(consciousInterval);
+                    showScreen('selectionScreen');
+                }
+            }, 1000);
+        }
+
+        // Start unconscious condition
+        function startUnconscious() {
+            nbackSequence = [];
+            nbackIndex = 0;
+            nbackScore = 0;
+            
+            for (let i = 0; i < 60; i++) {
+                nbackSequence.push(Math.floor(Math.random() * 9) + 1);
+            }
+
+            let timeLeft = 180;
+            updateTimerDisplay('unconsciousTimer', timeLeft);
+
+            unconsciousInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay('unconsciousTimer', timeLeft);
+                
+                if (timeLeft <= 0) {
+                    clearInterval(unconsciousInterval);
+                    clearInterval(nbackInterval);
+                    showScreen('selectionScreen');
+                }
+            }, 1000);
+
+            showNextNback();
+        }
+
+        // Show next n-back number
+        function showNextNback() {
+            if (nbackIndex >= nbackSequence.length) {
+                return;
+            }
+
+            document.getElementById('nbackNumber').textContent = nbackSequence[nbackIndex];
+            nbackIndex++;
+
+            nbackInterval = setTimeout(showNextNback, 3000);
+        }
+
+        // N-back response
+        function nbackResponse(isSame) {
+            if (nbackIndex < 3) return;
+
+            const current = nbackSequence[nbackIndex - 1];
+            const twoBack = nbackSequence[nbackIndex - 3];
+            const correct = (isSame && current === twoBack) || (!isSame && current !== twoBack);
+
+            if (correct) {
+                nbackScore++;
+                document.getElementById('nbackScore').textContent = nbackScore;
+            }
+        }
+
+        // Update timer display
+        function updateTimerDisplay(elementId, seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            document.getElementById(elementId).textContent = 
+                `${minutes}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Select apartment
+        function selectApartment(apartment) {
+            selectedApartment = apartment;
+            document.getElementById('selectedApartmentDisplay').textContent = `アパート ${apartment}`;
+            showScreen('reasonScreen');
+        }
+
+        // Submit reason
+        function submitReason() {
+            reasonText = document.getElementById('reasonText').value;
+            const endTime = Date.now();
+            const totalTime = Math.round((endTime - startTime) / 1000);
+
+            // Display results
+            document.getElementById('resultParticipantId').textContent = participantId;
+            document.getElementById('resultCondition').textContent = getConditionName(currentCondition);
+            document.getElementById('resultApartment').textContent = `アパート ${selectedApartment}`;
+            document.getElementById('resultTime').textContent = `${totalTime}秒`;
+
+            showScreen('resultScreen');
+        }
+
+        // Get condition name
+        function getConditionName(condition) {
+            const names = {
+                'immediate': 'Immediate（即時判断）',
+                'conscious': 'Conscious（熟考）',
+                'unconscious': 'Unconscious（気晴らし課題）'
+            };
+            return names[condition] || condition;
+        }
+
+        // Open Google Form with pre-filled data
+        function openGoogleForm() {
+            const params = new URLSearchParams({
+                'usp': 'pp_url',
+                [FORM_ENTRIES.participantId]: participantId,
+                [FORM_ENTRIES.condition]: getConditionName(currentCondition),
+                [FORM_ENTRIES.apartment]: `アパート ${selectedApartment}`,
+                [FORM_ENTRIES.reason]: reasonText
+            });
+
+            const formUrl = `${GOOGLE_FORM_BASE_URL}?${params.toString()}`;
+            window.open(formUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
